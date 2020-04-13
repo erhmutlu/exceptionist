@@ -1,4 +1,4 @@
-package exceptionist_go
+package exceptionist
 
 import "fmt"
 
