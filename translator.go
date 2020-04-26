@@ -1,9 +1,5 @@
 package exceptionist
 
-import (
-	"os"
-)
-
 type Language string
 
 const (
@@ -37,23 +33,18 @@ type TranslationService struct {
 }
 
 func NewTranslationService() TranslationService {
-	//var translations = map[string]translation{
-	//	"invalid.value": t1,
-	//	"error":         t2,
-	//}
-
 	translations := make(map[Language]bucket)
 	return TranslationService{translations: &translations}
 }
 
-func (translationService TranslationService) Add(lang Language, file *os.File) TranslationService{
+func (translationService TranslationService) Add(lang Language, filepath string) TranslationService {
 	translations := *translationService.translations
-
-	if _, ok := translations[lang] ; !ok {
-		var bucket = bucket{
-			"invalid.value": t1,
-			"error":         t2,
-		}
+	if _, ok := translations[lang]; !ok {
+		bucket := parseFile(filepath)
+		//var bucket = bucket{
+		//	"invalid.value": t1,
+		//	"error":         t2,
+		//}
 		translations[lang] = bucket
 	}
 	return translationService
