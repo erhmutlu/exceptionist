@@ -3,33 +3,33 @@ package exceptionist
 import "fmt"
 
 type TranslatedError struct {
-	errorCode string
-	errorMessage string
+	ErrorCode    int    `json:"errorCode"`
+	ErrorMessage string `json:"errorMessage"`
 }
 
 type ObservedError struct {
-	Key string
+	Key  string
 	Args []interface{}
 }
 
-func (err ObservedError) Error() string{
+func (err ObservedError) Error() string {
 	return fmt.Sprint(err.Key, "with args", err.Args)
 }
 
-func (err TranslatedError) Error() string{
-	return err.errorMessage
+func (err TranslatedError) Error() string {
+	return err.ErrorMessage
 }
 
 func NewObservedError(key string, args []interface{}) ObservedError {
 	return ObservedError{
-		Key: key,
+		Key:  key,
 		Args: args,
 	}
 }
 
-func newTranslatedError(errorCode string, errorMessage string) TranslatedError {
+func newTranslatedError(errorCode int, errorMessage string) TranslatedError {
 	return TranslatedError{
-		errorCode:    errorCode,
-		errorMessage: errorMessage,
+		ErrorCode:    errorCode,
+		ErrorMessage: errorMessage,
 	}
 }

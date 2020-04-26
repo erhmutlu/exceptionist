@@ -1,22 +1,22 @@
 package exceptionist
 
 type translation struct {
-	errorCode string
+	errorCode    int
 	errorMessage string
 }
 
 var defaultTranslation = translation{
-	errorCode: "0",
+	errorCode:    10001,
 	errorMessage: "Default.",
 }
 
 var t1 = translation{
-	errorCode:    "1",
+	errorCode:    1,
 	errorMessage: "Geçersiz değer.",
 }
 
 var t2 = translation{
-	errorCode:    "2",
+	errorCode:    2,
 	errorMessage: "Hata.",
 }
 
