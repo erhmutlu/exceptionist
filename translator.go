@@ -3,7 +3,6 @@ package exceptionist
 import (
 	"fmt"
 	"github.com/magiconair/properties"
-	"os"
 	"strconv"
 	"strings"
 )
@@ -35,24 +34,27 @@ var t2 = translation{
 	errorMessage: "Hata.",
 }
 
-type bucket map[string]translation
 type TranslationService struct {
+	config Config
 	translations *map[Language]bucket
 }
 
-func NewTranslationService() TranslationService {
+func NewTranslationService(config Config) TranslationService {
 	translations := make(map[Language]bucket)
-	return TranslationService{translations: &translations}
+
+	config = config.ensure()
+
+	return TranslationService{
+		config: config,
+		translations: &translations,
+	}
 }
 
-func (translationService TranslationService) Add(lang Language, filepath string) TranslationService {
+func (translationService TranslationService) AddLanguageSupport(lang Language) TranslationService {
 	translations := *translationService.translations
 	if _, ok := translations[lang]; !ok {
+		filepath := *translationService.config.Dir + "/messages_tr.properties"
 		bucket := readTranslations(filepath)
-		//var bucket = bucket{
-		//	"invalid.value": t1,
-		//	"error":         t2,
-		//}
 		translations[lang] = bucket
 	}
 	return translationService
@@ -70,7 +72,8 @@ func (translationService TranslationService) Translate(err ObservedError, lang L
 }
 
 func readTranslations(filepath string) bucket {
-	properties := properties.MustLoadFile(os.Getenv("GOPATH")+"/src/mytest/messages/"+"messages_tr.properties", properties.UTF8)
+	//os.Getenv("GOPATH")+"/src/mytest/messages/"+"messages_tr.properties"
+	properties := properties.MustLoadFile(filepath, properties.UTF8)
 
 	var bucket bucket = map[string]translation{}
 
