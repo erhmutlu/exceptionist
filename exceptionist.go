@@ -1,6 +1,8 @@
 package exceptionist
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type TranslatedError struct {
 	ErrorCode    int    `json:"errorCode"`

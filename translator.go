@@ -1,5 +1,13 @@
 package exceptionist
 
+import (
+	"fmt"
+	"github.com/magiconair/properties"
+	"os"
+	"strconv"
+	"strings"
+)
+
 type Language string
 
 const (
@@ -40,7 +48,7 @@ func NewTranslationService() TranslationService {
 func (translationService TranslationService) Add(lang Language, filepath string) TranslationService {
 	translations := *translationService.translations
 	if _, ok := translations[lang]; !ok {
-		bucket := parseFile(filepath)
+		bucket := readTranslations(filepath)
 		//var bucket = bucket{
 		//	"invalid.value": t1,
 		//	"error":         t2,
@@ -59,4 +67,28 @@ func (translationService TranslationService) Translate(err ObservedError, lang L
 	}
 
 	return newTranslatedError(defaultTranslation.errorCode, defaultTranslation.errorMessage)
+}
+
+func readTranslations(filepath string) bucket {
+	properties := properties.MustLoadFile(os.Getenv("GOPATH")+"/src/mytest/messages/"+"messages_tr.properties", properties.UTF8)
+
+	var bucket bucket = map[string]translation{}
+
+	for _, key := range properties.Keys() {
+		val := properties.MustGet(key)
+		if semiColon := strings.Index(val, ";"); semiColon >= 0 {
+			errorCode, err := strconv.Atoi(val[:semiColon])
+			if err != nil {
+				fmt.Println("invalid errorCode in the properties file:", filepath)
+			}
+
+			errorMessage := val[semiColon+1:]
+			bucket[key] = translation{
+				errorCode:    errorCode,
+				errorMessage: errorMessage,
+			}
+		}
+	}
+
+	return bucket
 }
