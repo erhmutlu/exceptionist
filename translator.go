@@ -1,5 +1,16 @@
 package exceptionist
 
+import (
+	"os"
+)
+
+type Language string
+
+const (
+	TR Language = "tr"
+	EN Language = "en"
+)
+
 type translation struct {
 	errorCode    int
 	errorMessage string
@@ -20,23 +31,39 @@ var t2 = translation{
 	errorMessage: "Hata.",
 }
 
+type bucket map[string]translation
 type TranslationService struct {
-	translations *map[string]translation
+	translations *map[Language]bucket
 }
 
-func InitializeTranslationService() TranslationService {
-	var translations = map[string]translation{
-		"invalid.value": t1,
-		"error":         t2,
-	}
+func NewTranslationService() TranslationService {
+	//var translations = map[string]translation{
+	//	"invalid.value": t1,
+	//	"error":         t2,
+	//}
 
+	translations := make(map[Language]bucket)
 	return TranslationService{translations: &translations}
 }
 
-func (translationService TranslationService) Translate(err ObservedError) TranslatedError {
+func (translationService TranslationService) Add(lang Language, file *os.File) TranslationService{
 	translations := *translationService.translations
 
-	if translation, ok := translations[err.Key]; ok {
+	if _, ok := translations[lang] ; !ok {
+		var bucket = bucket{
+			"invalid.value": t1,
+			"error":         t2,
+		}
+		translations[lang] = bucket
+	}
+	return translationService
+}
+
+func (translationService TranslationService) Translate(err ObservedError, lang Language) TranslatedError {
+	translations := *translationService.translations
+	bucket := translations[lang]
+
+	if translation, ok := bucket[err.Key]; ok {
 		return newTranslatedError(translation.errorCode, translation.errorMessage)
 	}
 
