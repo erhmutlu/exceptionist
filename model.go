@@ -1,28 +1,40 @@
 package exceptionist
 
+type Language string
+
 const (
-	requiredTag = "required"
-	defaultTag  = "default"
+	TR Language = "tr"
+	EN Language = "en"
 )
 
-const defaultPrefix string = "messages"
-
-type Config struct {
-	Dir    *string
-	Prefix *string
+type bucket map[string]translation
+type translation struct {
+	errorCode    int
+	errorMessage string
 }
 
-type bucket map[string]translation
+var defaultTranslation = translation{
+	errorCode:    10001,
+	errorMessage: "Default.",
+}
 
-func (config Config) ensure() Config{
-	if config.Dir == nil {
+type Config struct {
+	dir    *string
+	prefix *string
+}
+
+func NewConfig(dir *string, prefix *string) Config {
+	if dir == nil {
 		panic("messages dir is required field.")
 	}
 
-	if config.Prefix == nil {
-		var prefix = defaultPrefix
-		config.Prefix = &prefix
+	if prefix == nil {
+		var defaultPrefix = "messages"
+		prefix = &defaultPrefix
 	}
 
-	return config
+	return Config{
+		dir:    dir,
+		prefix: prefix,
+	}
 }
