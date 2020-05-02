@@ -29,12 +29,9 @@ func NewTranslationService(config Config, supportedLanguages ...Language) Transl
 func (translationService TranslationService) Translate(err ObservedError, lang Language) TranslatedError {
 	translations := *translationService.translations
 	bucket := translations[lang]
-
-	if translation, ok := bucket[err.Key]; ok {
-		return newTranslatedError(translation.errorCode, translation.errorMessage)
-	}
-
-	return newTranslatedError(defaultTranslation.errorCode, defaultTranslation.errorMessage)
+	row := bucket.findRow(err.Key)
+	errorMessage := bucket.formatToErrorMessage(row, err.Args)
+	return newTranslatedError(row.errorCode, errorMessage)
 }
 
 func (translationService TranslationService) addLanguageSupport(lang Language) TranslationService {
@@ -50,7 +47,7 @@ func (translationService TranslationService) addLanguageSupport(lang Language) T
 func readTranslations(filepath string) bucket {
 	props := properties.MustLoadFile(filepath, properties.UTF8)
 
-	var bucket bucket = map[string]translation{}
+	bucket := newBucket()
 
 	for _, key := range props.Keys() {
 		val := props.MustGet(key)
@@ -61,13 +58,9 @@ func readTranslations(filepath string) bucket {
 				continue
 			}
 
-			errorMessage := val[semiColon+1:]
-			bucket[key] = translation{
-				errorCode:    errorCode,
-				errorMessage: errorMessage,
-			}
+			errorMessageTemplate := val[semiColon+1:]
+			bucket.addRow(key, errorCode, errorMessageTemplate)
 		}
 	}
-
 	return bucket
 }
