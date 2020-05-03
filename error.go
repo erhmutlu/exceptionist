@@ -4,14 +4,14 @@ import (
 	"fmt"
 )
 
-type TranslatedError struct {
-	ErrorCode    int    `json:"errorCode"`
-	ErrorMessage string `json:"errorMessage"`
-}
-
 type ObservedError struct {
 	Key  string
 	Args []interface{}
+}
+
+type TranslatedError struct {
+	ErrorCode    int    `json:"errorCode"`
+	ErrorMessage string `json:"errorMessage"`
 }
 
 func (err ObservedError) Error() string {

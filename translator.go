@@ -37,17 +37,16 @@ func (translationService TranslationService) Translate(err ObservedError, lang L
 func (translationService TranslationService) addLanguageSupport(lang Language) TranslationService {
 	translations := *translationService.translations
 	if _, ok := translations[lang]; !ok {
-		filepath := *translationService.config.dir + "/messages_" + string(lang) + ".properties"
-		bucket := readTranslations(filepath)
-		translations[lang] = bucket
+		filepath := *translationService.config.dir + "/messages_" + lang.symbol + ".properties"
+		translations[lang] = readTranslations(filepath, lang)
 	}
 	return translationService
 }
 
-func readTranslations(filepath string) bucket {
+func readTranslations(filepath string, lang Language) bucket {
 	props := properties.MustLoadFile(filepath, properties.UTF8)
 
-	bucket := newBucket()
+	bucket := newBucket(lang)
 
 	for _, key := range props.Keys() {
 		val := props.MustGet(key)

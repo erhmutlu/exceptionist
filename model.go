@@ -6,11 +6,23 @@ import (
 )
 
 //Language
-type Language string
+type Language struct {
+	symbol              string
+	defaultErrorCode    int
+	defaultErrorMessage string
+}
 
-const (
-	TR Language = "tr"
-	EN Language = "en"
+var (
+	TR = Language{
+		symbol:              "tr",
+		defaultErrorCode:    100,
+		defaultErrorMessage: "İşleminizi şuanda gerçekleştiremiyoruz.",
+	}
+	EN = Language{
+		symbol:              "en",
+		defaultErrorCode:    100,
+		defaultErrorMessage: "We are currently unable to complete your transaction.",
+	}
 )
 
 //Bucket
@@ -18,23 +30,26 @@ type bucket struct {
 	rows             map[string]row
 	messageTemplates *template.Template
 }
+
 type row struct {
 	errorCode    int
 	templateName string
 }
 
-var defaultTranslationRow = newRow(1000, "default")
-
-func newBucket() bucket {
+func newBucket(lang Language) bucket {
+	tmpl := template.Must(template.New("default").Parse(lang.defaultErrorMessage))
+	rows := map[string]row{
+		"default": newRow(lang.defaultErrorCode, "default"),
+	}
 	return bucket{
-		rows:             map[string]row{},
-		messageTemplates: template.New("tmpl"),
+		rows:             rows,
+		messageTemplates: tmpl,
 	}
 }
 
-func (bucket bucket) addRow(key string, errorCode int, template string) {
-	bucket.messageTemplates.New(key).Parse(template)
+func (bucket bucket) addRow(key string, errorCode int, errorMessageTemplate string) {
 	bucket.rows[key] = newRow(errorCode, key)
+	bucket.messageTemplates.New(key).Parse(errorMessageTemplate)
 }
 
 func (bucket bucket) findRow(key string) row {
@@ -42,7 +57,7 @@ func (bucket bucket) findRow(key string) row {
 		return row
 	}
 
-	return defaultTranslationRow
+	return bucket.rows["default"]
 }
 
 func (bucket bucket) formatToErrorMessage(row row, args []interface{}) string {
