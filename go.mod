@@ -3,6 +3,6 @@ module github.com/erhmutlu/g-exceptionist
 go 1.14
 
 require (
-	github.com/BurntSushi/toml v0.3.1
-	github.com/spf13/viper v1.6.3
+    github.com/magiconair/properties v1.8.1
+    github.com/spf13/afero v1.2.2
 )
