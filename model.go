@@ -2,6 +2,7 @@ package exceptionist
 
 import (
 	"bytes"
+	"fmt"
 	"text/template"
 )
 
@@ -48,6 +49,10 @@ func newBucket(lang Language) bucket {
 }
 
 func (bucket bucket) addRow(key string, errorCode int, errorMessageTemplate string) {
+	if _, ok := bucket.rows[key]; ok {
+		fmt.Println("Key:", key, "is duplicated on translation file")
+	}
+
 	bucket.rows[key] = newRow(errorCode, key)
 	bucket.messageTemplates.New(key).Parse(errorMessageTemplate)
 }

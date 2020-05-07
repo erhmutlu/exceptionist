@@ -4,18 +4,18 @@ import "github.com/magiconair/properties"
 
 type Read func(filePath string) map[string]string
 
-type PropertyFileReader interface {
+type TranslationFileReader interface {
 	Read(filePath string) map[string]string
 }
 
-type propertiesFileReader struct {
+type PropertiesFileReader struct {
 }
 
-func NewPropertiesFileReader() propertiesFileReader {
-	return propertiesFileReader{}
+func NewPropertiesFileReader() PropertiesFileReader {
+	return PropertiesFileReader{}
 }
 
-func (reader propertiesFileReader) Read(filePath string) map[string]string {
+func (reader PropertiesFileReader) Read(filePath string) map[string]string {
 	props := properties.MustLoadFile(filePath, properties.UTF8)
 	result := make(map[string]string)
 

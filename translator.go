@@ -9,7 +9,7 @@ import (
 
 type ErrorTranslator struct {
 	config       Config
-	reader       reader.PropertyFileReader
+	reader       reader.TranslationFileReader
 	translations *map[Language]bucket
 }
 
@@ -23,17 +23,19 @@ func NewTranslator(config Config) ErrorTranslator {
 	}
 }
 
-func (errorTranslator *ErrorTranslator) AddLanguageSupport(lang Language) ErrorTranslator{
+func (errorTranslator *ErrorTranslator) AddLanguageSupport(lang Language) {
 	translations := *errorTranslator.translations
 	if _, ok := translations[lang]; !ok {
 		translations[lang] = errorTranslator.prepareTranslationBucket(lang)
 	}
-
-	return *errorTranslator
 }
 
 func (errorTranslator ErrorTranslator) Translate(err ObservedError, lang Language) TranslatedError {
 	translations := *errorTranslator.translations
+	if _, ok := translations[lang]; !ok {
+		return newTranslatedError(TR.defaultErrorCode, TR.defaultErrorMessage)
+	}
+
 	bucket := translations[lang]
 	row := bucket.findRow(err.Key)
 	errorMessage := bucket.formatToErrorMessage(row, err.Args)
