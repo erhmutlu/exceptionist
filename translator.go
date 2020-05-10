@@ -33,13 +33,18 @@ func (errorTranslator *ErrorTranslator) AddLanguageSupport(lang Language) {
 func (errorTranslator ErrorTranslator) Translate(err ObservedError, lang Language) TranslatedError {
 	translations := *errorTranslator.translations
 	if _, ok := translations[lang]; !ok {
-		return newTranslatedError(TR.defaultErrorCode, TR.defaultErrorMessage)
+		return TR.toDefaultTranslatedError()
 	}
 
 	bucket := translations[lang]
 	row := bucket.findRow(err.Key)
 	errorMessage := bucket.formatToErrorMessage(row, err.Args)
-	return newTranslatedError(row.errorCode, errorMessage)
+
+	if err.RevealError {
+		return newTranslatedError(row.errorCode, errorMessage, errorMessage, err.InternalErrorDetail)
+	} else {
+		return newTranslatedError(row.errorCode, errorMessage, lang.defaultErrorMessage, err.InternalErrorDetail)
+	}
 }
 
 func (errorTranslator *ErrorTranslator) prepareTranslationBucket(lang Language) bucket {

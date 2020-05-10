@@ -26,6 +26,10 @@ var (
 	}
 )
 
+func (lang Language) toDefaultTranslatedError() TranslatedError {
+	return newTranslatedError(lang.defaultErrorCode, lang.defaultErrorMessage, lang.defaultErrorMessage, nil)
+}
+
 //Bucket
 type bucket struct {
 	rows             map[string]row
