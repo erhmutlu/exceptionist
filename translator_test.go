@@ -14,7 +14,7 @@ func Test_NewTranslator(t *testing.T) {
 
 	//then
 	assert.NotNil(t, translator)
-	assert.NotNil(t, translator.reader)
+	assert.NotNil(t, translator.read)
 	assert.Equal(t, config, translator.config)
 	assert.NotNil(t, translator.translations)
 }
@@ -27,7 +27,7 @@ func TestErrorTranslator_AddLanguageSupport(t *testing.T) {
 	translator.AddLanguageSupport(TR)
 
 	//then
-	translations := *translator.translations
+	translations := translator.translations
 	assert.Contains(t, translations, TR, "TR translations should be added")
 
 	bucket := translations[TR]
@@ -54,7 +54,7 @@ func TestErrorTranslator_AddLanguageSupport_Callable_More_Then_One(t *testing.T)
 	translator.AddLanguageSupport(EN)
 
 	//then
-	translations := *translator.translations
+	translations := translator.translations
 	assert.Contains(t, translations, TR, "TR translations should be added")
 	assert.Contains(t, translations, EN, "EN translations should be added")
 }
@@ -128,7 +128,7 @@ func TestErrorTranslator_Translate_Should_Return_TRDefaultErrorResponse_When_Giv
 func prepareConfig() Config {
 	dir := "myDir"
 	prefix := "myPrefix"
-	config := Config{dir: &dir, prefix: &prefix}
+	config := Config{dir: dir, prefix: prefix}
 	return config
 }
 
@@ -138,18 +138,17 @@ func prepareObservedError() ObservedError {
 
 func prepareTranslatorWithMockReader() ErrorTranslator {
 	config := prepareConfig()
-	emptyTranslations := make(map[Language]bucket)
 	return ErrorTranslator{
 		config:       config,
-		reader:       mockFileReader{},
-		translations: &emptyTranslations,
+		read:         mockRead,
+		translations: make(map[Language]bucket),
 	}
 }
 
 type mockFileReader struct {
 }
 
-func (reader mockFileReader) Read(filePath string) map[string]string {
+func mockRead(filePath string) map[string]string {
 	mockData := make(map[string]string)
 	mockData["key1"] = "1000;errorTemplate1"
 	mockData["key2"] = "1001;errorTemplate2"

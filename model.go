@@ -74,6 +74,7 @@ func (bucket bucket) formatToErrorMessage(row row, args []interface{}) string {
 	if err := bucket.messageTemplates.ExecuteTemplate(buf, row.templateName, args); err != nil {
 		panic(err)
 	}
+
 	return buf.String()
 }
 
@@ -86,18 +87,18 @@ func newRow(errorCode int, templateName string) row {
 
 //Config
 type Config struct {
-	dir    *string
-	prefix *string
+	dir    string
+	prefix string
 }
 
-func NewConfig(dir *string, prefix *string) Config {
-	if dir == nil {
+func NewConfig(dir string, prefix string) Config {
+	if dir == "" {
 		panic("messages dir is required field.")
 	}
 
-	if prefix == nil {
+	if prefix == "" {
 		var defaultPrefix = "messages"
-		prefix = &defaultPrefix
+		prefix = defaultPrefix
 	}
 
 	return Config{

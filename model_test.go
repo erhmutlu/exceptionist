@@ -117,28 +117,21 @@ func TestBucket_FormatToErrorMessage_With_Args(t *testing.T) {
 }
 
 func Test_NewConfig(t *testing.T) {
-	//given
-	dir := "myDir"
-	prefix := "myPrefix"
-
-	//when
-	config := NewConfig(&dir, &prefix)
+	//given && when
+	config := NewConfig("myDir", "myPrefix")
 
 	//then
-	assert.Equal(t, "myDir", *config.dir)
-	assert.Equal(t, "myPrefix", *config.prefix)
+	assert.Equal(t, "myDir", config.dir)
+	assert.Equal(t, "myPrefix", config.prefix)
 }
 
 func Test_NewConfig_When_PrefixIsNotGiven(t *testing.T) {
-	//given
-	dir := "myDir"
-
-	//when
-	config := NewConfig(&dir, nil)
+	//given && when
+	config := NewConfig("myDir", "")
 
 	//then
-	assert.Equal(t, "myDir", *config.dir)
-	assert.Equal(t, "messages", *config.prefix)
+	assert.Equal(t, "myDir", config.dir)
+	assert.Equal(t, "messages", config.prefix)
 }
 
 func prepareEmptyTestBucket() bucket {

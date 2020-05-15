@@ -9,8 +9,8 @@ import (
 
 type ErrorTranslator struct {
 	config       Config
-	reader       reader.TranslationFileReader
-	translations *map[Language]bucket
+	read         reader.Read
+	translations map[Language]bucket
 }
 
 func NewTranslator(config Config) ErrorTranslator {
@@ -18,40 +18,40 @@ func NewTranslator(config Config) ErrorTranslator {
 
 	return ErrorTranslator{
 		config:       config,
-		reader:       reader.NewPropertiesFileReader(),
-		translations: &translations,
+		read:         reader.PropertyRead,
+		translations: translations,
 	}
 }
 
 func (errorTranslator *ErrorTranslator) AddLanguageSupport(lang Language) {
-	translations := *errorTranslator.translations
+	translations := errorTranslator.translations
 	if _, ok := translations[lang]; !ok {
 		translations[lang] = errorTranslator.prepareTranslationBucket(lang)
 	}
 }
 
 func (errorTranslator ErrorTranslator) Translate(err ObservedError, lang Language) TranslatedError {
-	translations := *errorTranslator.translations
-	if _, ok := translations[lang]; !ok {
+	translations := errorTranslator.translations
+	bucket, ok := translations[lang]
+	if !ok {
 		return TR.toDefaultTranslatedError()
 	}
 
-	bucket := translations[lang]
 	row := bucket.findRow(err.Key)
 	errorMessage := bucket.formatToErrorMessage(row, err.Args)
 
 	if err.RevealError {
 		return newTranslatedError(row.errorCode, errorMessage, errorMessage, err.InternalErrorDetail)
-	} else {
-		return newTranslatedError(row.errorCode, errorMessage, lang.defaultErrorMessage, err.InternalErrorDetail)
 	}
+
+	return newTranslatedError(row.errorCode, errorMessage, lang.defaultErrorMessage, err.InternalErrorDetail)
 }
 
 func (errorTranslator *ErrorTranslator) prepareTranslationBucket(lang Language) bucket {
 	bucket := newBucket(lang)
 
-	filepath := *errorTranslator.config.dir + "/" + *errorTranslator.config.prefix + "_" + lang.symbol + ".properties"
-	props := errorTranslator.reader.Read(filepath)
+	filepath := errorTranslator.config.dir + "/" + errorTranslator.config.prefix + "_" + lang.symbol + ".properties"
+	props := errorTranslator.read(filepath)
 	for key, val := range props {
 		if semiColon := strings.Index(val, ";"); semiColon >= 0 {
 			errorCode, err := strconv.Atoi(val[:semiColon])
