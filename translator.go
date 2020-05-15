@@ -37,14 +37,7 @@ func (errorTranslator ErrorTranslator) Translate(err ObservedError, lang Languag
 		return TR.toDefaultTranslatedError()
 	}
 
-	row := bucket.findRow(err.Key)
-	errorMessage := bucket.formatToErrorMessage(row, err.Args)
-
-	if err.RevealError {
-		return newTranslatedError(row.errorCode, errorMessage, errorMessage, err.InternalErrorDetail)
-	}
-
-	return newTranslatedError(row.errorCode, errorMessage, lang.defaultErrorMessage, err.InternalErrorDetail)
+	return err.translate(bucket)
 }
 
 func (errorTranslator *ErrorTranslator) prepareTranslationBucket(lang Language) bucket {

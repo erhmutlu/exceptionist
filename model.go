@@ -27,11 +27,12 @@ var (
 )
 
 func (lang Language) toDefaultTranslatedError() TranslatedError {
-	return newTranslatedError(lang.defaultErrorCode, lang.defaultErrorMessage, lang.defaultErrorMessage, nil)
+	return newTranslatedError(lang.defaultErrorCode, lang.defaultErrorMessage, string(lang.defaultErrorCode))
 }
 
 //Bucket
 type bucket struct {
+	lang             Language
 	rows             map[string]row
 	messageTemplates *template.Template
 }
@@ -47,6 +48,7 @@ func newBucket(lang Language) bucket {
 		"default": newRow(lang.defaultErrorCode, "default"),
 	}
 	return bucket{
+		lang:             lang,
 		rows:             rows,
 		messageTemplates: tmpl,
 	}
