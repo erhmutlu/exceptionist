@@ -7,6 +7,7 @@ type ObservedError interface {
 	translate(bucket bucket) TranslatedError
 }
 
+// BusinessError
 type BusinessError struct {
 	key         string
 	args        []interface{}
@@ -36,23 +37,24 @@ func (err BusinessError) translate(bucket bucket) TranslatedError {
 	return newTranslatedError(row.errorCode, errorMessage, string(row.errorCode))
 }
 
-type InternalError struct {
+// WrappedError
+type WrappedError struct {
 	error       error
 	revealError bool
 }
 
-func WrapInternalError(error error, revealError bool) InternalError {
-	return InternalError{
+func WrapError(error error, revealError bool) WrappedError {
+	return WrappedError{
 		error:       error,
 		revealError: revealError,
 	}
 }
 
-func (err InternalError) Error() string {
+func (err WrappedError) Error() string {
 	return fmt.Sprint("Error: ", err.error)
 }
 
-func (err InternalError) translate(bucket bucket) TranslatedError {
+func (err WrappedError) translate(bucket bucket) TranslatedError {
 	lang := bucket.lang
 	context := err.error.Error()
 	if !err.revealError {

@@ -40,7 +40,7 @@ import ex "github.com/erhmutlu/g-exceptionist"
 var dir = "/path/to/templates/dir"
 var prefix = "template-files-prefix"
 
-config := ex.NewConfig(&dir, $prefix)
+config := ex.NewConfig(dir, prefix)
 var errorTranslator = ex.NewTranslator(config)
 errorTranslator.AddLanguageSupport(ex.TR)
 errorTranslator.AddLanguageSupport(ex.EN)
@@ -48,12 +48,13 @@ errorTranslator.AddLanguageSupport(ex.EN)
 
 - At least one language should be supported, otherwise Translator will always translate to default ```Turkish Error Translation```.
 
-#### Usage
+#### Business Error Usage
 ```golang
 import ex "github.com/erhmutlu/g-exceptionist"
 
+var revealError = true
 projectError := YourCustomProjectError{
-			ObservedError: ex.NewObservedError("error.key2", []interface{}{"0", "1", "2}),
+			ObservedError: ex.NewError("error.key2", revealError, []interface{}{"0", "1", "2}),
 			//your other fields here
 		}
 
@@ -62,9 +63,27 @@ fmt.Println(translatedError.ErrorCode) //10002
 fmt.Println(translatedError.ErrorMessage) //Error message template with arg 0, 1, 2
 ```
 
+- If the `revealError` parameter is set true, translated error detail will be placed in translation response, otherwise default error message for the language will be used.
 - If given language is not supported, Translator will produce default ```Turkish Error Translation```.
 - If given errorKey is not found in supported language errors, Translator will produce default ```Error Translation``` for corresponding language.
 
+#### Wrapped Error Usage
+```golang
+import ex "github.com/erhmutlu/g-exceptionist"
+
+var revealError = true
+projectError := YourCustomProjectError{
+			ObservedError: ex.WrapError(err, false),
+			//your other fields here
+		}
+
+translatedError := errorTranslator.Translate(projectError.ObservedError, ex.EN)
+fmt.Println(translatedError.ErrorCode) //10002
+fmt.Println(translatedError.ErrorMessage) //Error message template with arg 0, 1, 2
+```
+
+- If the `revealError` parameter is set true, wrapped error will be placed in the response, otherwise default error message for the language will be used.
+- If given language is not supported, Translator will produce default ```Turkish Error Translation```.
 
 #### Default Errors
 - en
